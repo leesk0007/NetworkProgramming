@@ -53,6 +53,10 @@ public class ClientGUI extends JFrame {
                     JOptionPane.showMessageDialog(ClientGUI.this, "닉네임을 입력해주세요.");
                     return;
                 }
+                if (Protocol.hasReservedDelims(nickname)) {
+                    JOptionPane.showMessageDialog(ClientGUI.this, "닉네임에 |, ;, , 문자는 사용할 수 없습니다.");
+                    return;
+                }
                 showScreen(SCREEN_LOBBY);
             }
         });
