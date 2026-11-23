@@ -47,12 +47,12 @@ public final class Protocol {
     public static final String ITEM_APPLIED = "ITEM_APPLIED"; // 서 -> 클: ITEM_APPLIED|사용자닉네임|아이템종류|대상유저
     public static final String ITEM_FAIL = "ITEM_FAIL"; // 서 -> 클: ITEM_FAIL|실패사유
 
-    // 명령어와 필드를 구분자로 결합하여 전송 패킷 문자열 생성
+    // 명령어와 필드를 구분자로 결합하여 전송 문자열 생성
     public static String build(String... parts) {
         return String.join(DELIM, parts);
     }
 
-    // 닉네임 또는 방 제목 내 예약 구분자 포함 여부 검사
+    // 구분자 포함 여부 검사
     public static boolean hasReservedDelims(String text) {
         if (text == null) {
             return false;
