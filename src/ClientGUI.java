@@ -366,6 +366,46 @@ public class ClientGUI extends JFrame {
         cardLayout.show(mainContainer, screenName);
     }
 
+    // 소켓 통신 응답 처리 메서드
+    public void onLoginSuccess() {
+        lobbyUserLabel.setText("로비 (" + myNickname + ")");
+        showScreen(SCREEN_LOBBY);
+    }
+
+    public void onLoginFail(String reason) {
+        JOptionPane.showMessageDialog(this, reason);
+    }
+
+    public void updateRoomList(String roomData) {
+        roomTableModel.setRowCount(0);
+        if (roomData == null || roomData.trim().isEmpty()) {
+            return;
+        }
+
+        String[] rooms = roomData.split(Protocol.LIST_DELIM);
+        for (String room : rooms) {
+            String[] info = room.split(Protocol.ITEM_DELIM);
+            if (info.length >= 4) {
+                roomTableModel.addRow(new Object[]{info[0], info[1], info[2], info[3]});
+            } else if (info.length >= 3) {
+                roomTableModel.addRow(new Object[]{info[0], info[1], info[2], "대기중"});
+            }
+        }
+    }
+
+    public void appendChatMessage(String sender, String message) {
+        lobbyChatArea.append(sender + " : " + message + "\n");
+        lobbyChatArea.setCaretPosition(lobbyChatArea.getDocument().getLength());
+    }
+
+    public void onEnterRoomSuccess(String roomId, String roomTitle) {
+        showScreen(SCREEN_ROOM);
+    }
+
+    public void onRoomFail(String reason) {
+        JOptionPane.showMessageDialog(this, reason);
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
