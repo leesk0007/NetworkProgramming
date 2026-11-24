@@ -1,0 +1,202 @@
+[
+{
+"question": "일본의 대표 요리",
+"answer": "초밥",
+"chosung": "ㅊ ㅂ"
+},
+{
+"question": "빨갛고 둥근 과일",
+"answer": "사과",
+"chosung": "ㅅ ㄱ"
+},
+{
+"question": "몸이나 손의 물기를 닦는 천",
+"answer": "수건",
+"chosung": "ㅅ ㄱ"
+},
+{
+"question": "시간을 알려 주는 기계",
+"answer": "시계",
+"chosung": "ㅅ ㄱ"
+},
+{
+"question": "주목할 만한 일",
+"answer": "사건",
+"chosung": "ㅅ ㄱ"
+},
+{
+"question": "짠맛을 내는 하얀 조미료",
+"answer": "소금",
+"chosung": "ㅅ ㄱ"
+},
+{
+"question": "지구 표면의 대부분을 덮은 짠물",
+"answer": "바다",
+"chosung": "ㅂ ㄷ"
+},
+{
+"question": "물체의 밑을 이루는 평평한 면",
+"answer": "바닥",
+"chosung": "ㅂ ㄷ"
+},
+{
+"question": "땅 위로 높이 펼쳐진 공간",
+"answer": "하늘",
+"chosung": "ㅎ ㄴ"
+},
+{
+"question": "학생을 가르치는 기관",
+"answer": "학교",
+"chosung": "ㅎ ㄱ"
+},
+{
+"question": "한반도에 있는 나라",
+"answer": "한국",
+"chosung": "ㅎ ㄱ"
+},
+{
+"question": "전자 회로로 계산하는 기계",
+"answer": "컴퓨터",
+"chosung": "ㅋ ㅍ ㅌ"
+},
+{
+"question": "글자를 입력하는 장치",
+"answer": "키보드",
+"chosung": "ㅋ ㅂ ㄷ"
+},
+{
+"question": "화면의 커서를 움직이는 장치",
+"answer": "마우스",
+"chosung": "ㅁ ㅇ ㅅ"
+},
+{
+"question": "화면을 보여 주는 장치",
+"answer": "모니터",
+"chosung": "ㅁ ㄴ ㅌ"
+},
+{
+"question": "엔진으로 움직이는 탈것",
+"answer": "자동차",
+"chosung": "ㅈ ㄷ ㅊ"
+},
+{
+"question": "페달을 밟아 움직이는 두 바퀴 탈것",
+"answer": "자전거",
+"chosung": "ㅈ ㅈ ㄱ"
+},
+{
+"question": "하늘을 나는 탈것",
+"answer": "비행기",
+"chosung": "ㅂ ㅎ ㄱ"
+},
+{
+"question": "땅속을 달리는 전철",
+"answer": "지하철",
+"chosung": "ㅈ ㅎ ㅊ"
+},
+{
+"question": "책을 모아 두고 보게 하는 곳",
+"answer": "도서관",
+"chosung": "ㄷ ㅅ ㄱ"
+},
+{
+"question": "환자를 치료하는 곳",
+"answer": "병원",
+"chosung": "ㅂ ㅇ"
+},
+{
+"question": "비를 막는 도구",
+"answer": "우산",
+"chosung": "ㅇ ㅅ"
+},
+{
+"question": "소의 젖",
+"answer": "우유",
+"chosung": "ㅇ ㅇ"
+},
+{
+"question": "시력을 돕기 위해 눈에 쓰는 물건",
+"answer": "안경",
+"chosung": "ㅇ ㄱ"
+},
+{
+"question": "흑연으로 글씨를 쓰는 필기구",
+"answer": "연필",
+"chosung": "ㅇ ㅍ"
+},
+{
+"question": "물건을 넣어 들고 다니는 도구",
+"answer": "가방",
+"chosung": "ㄱ ㅂ"
+},
+{
+"question": "모습을 비추어 보는 물건",
+"answer": "거울",
+"chosung": "ㄱ ㅇ"
+},
+{
+"question": "음식을 차갑게 보관하는 기계",
+"answer": "냉장고",
+"chosung": "ㄴ ㅈ ㄱ"
+},
+{
+"question": "배추를 소금에 절여 양념한 음식",
+"answer": "김치",
+"chosung": "ㄱ ㅊ"
+},
+{
+"question": "야옹 하고 우는 동물",
+"answer": "고양이",
+"chosung": "ㄱ ㅇ ㅇ"
+},
+{
+"question": "개의 새끼",
+"answer": "강아지",
+"chosung": "ㄱ ㅇ ㅈ"
+},
+{
+"question": "줄무늬가 있는 큰 고양잇과 동물",
+"answer": "호랑이",
+"chosung": "ㅎ ㄹ ㅇ"
+},
+{
+"question": "줄기와 가지가 있는 식물",
+"answer": "나무",
+"chosung": "ㄴ ㅁ"
+},
+{
+"question": "날짜를 적어 놓은 것",
+"answer": "달력",
+"chosung": "ㄷ ㄹ"
+},
+{
+"question": "상대에게 전하는 글",
+"answer": "편지",
+"chosung": "ㅍ ㅈ"
+},
+{
+"question": "공을 발로 차서 골에 넣는 운동",
+"answer": "축구",
+"chosung": "ㅊ ㄱ"
+},
+{
+"question": "방망이로 공을 치는 운동",
+"answer": "야구",
+"chosung": "ㅇ ㄱ"
+},
+{
+"question": "공을 바스켓에 넣는 운동",
+"answer": "농구",
+"chosung": "ㄴ ㄱ"
+},
+{
+"question": "닭을 튀긴 음식",
+"answer": "치킨",
+"chosung": "ㅊ ㅋ"
+},
+{
+"question": "물건을 보관하는 건물",
+"answer": "창고",
+"chosung": "ㅊ ㄱ"
+}
+]
