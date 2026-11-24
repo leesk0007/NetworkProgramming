@@ -6,13 +6,24 @@ import java.awt.event.*;
 
 public class ClientGUI extends JFrame {
 
+    // ===============================
+    //  서버 연결 정보 및 화면 컴포넌트로 사용하는 것들
+    // ===============================
+
     public static final String SCREEN_LOGIN = "LOGIN";
     public static final String SCREEN_LOBBY = "LOBBY";
     public static final String SCREEN_ROOM = "ROOM";
 
+    private static final String SERVER_IP = "127.0.0.1";
+    private static final int SERVER_PORT = 12345;
+    private static final String LOBBY_ROOM_ID = "0";
+
     private CardLayout cardLayout;
     private JPanel mainContainer;
     private String myNickname = "";
+
+    private ClientSocket clientSocket;
+    private boolean isConnected = false;
 
     // 대기실 컴포넌트
     private JLabel lobbyUserLabel;
@@ -21,12 +32,24 @@ public class ClientGUI extends JFrame {
     private JTextArea lobbyChatArea;
     private JTextField lobbyChatInput;
 
+    // ===============================
+    //  프레임, 소켓 연결 준비
+    // ===============================
     public ClientGUI() {
+        clientSocket = new ClientSocket(this, SERVER_IP, SERVER_PORT);
+
         setTitle("초성 퀴즈 온라인 - ClientGUI");
         setSize(800, 650);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                clientSocket.disconnect();
+            }
+        });
 
         cardLayout = new CardLayout();
         mainContainer = new JPanel(cardLayout);
@@ -42,6 +65,9 @@ public class ClientGUI extends JFrame {
         setVisible(true);
     }
 
+    // ===============================
+    // 로그인
+    // ===============================
     private JPanel createLoginPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(new Color(220, 220, 220));
@@ -75,7 +101,7 @@ public class ClientGUI extends JFrame {
         gbc.insets = new Insets(10, 10, 25, 10);
         panel.add(inputPanel, gbc);
 
-        // 버튼 접속/나가기
+        // 접속/나가기 버튼
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         buttonPanel.setOpaque(false);
 
@@ -98,9 +124,17 @@ public class ClientGUI extends JFrame {
                     JOptionPane.showMessageDialog(ClientGUI.this, "닉네임에 |, ;, , 문자는 사용할 수 없습니다.");
                     return;
                 }
+
+                if (!isConnected) {
+                    isConnected = clientSocket.connect();
+                    if (!isConnected) {
+                        JOptionPane.showMessageDialog(ClientGUI.this, "서버에 연결할 수 없습니다.");
+                        return;
+                    }
+                }
+
                 myNickname = nickname;
-                lobbyUserLabel.setText("로비 (" + myNickname + ")");
-                showScreen(SCREEN_LOBBY);
+                clientSocket.sendMessage(Protocol.build(Protocol.SET_NAME, nickname));
             }
         });
 
@@ -129,13 +163,15 @@ public class ClientGUI extends JFrame {
         return panel;
     }
 
-    // 대기실 로비 화면
+    // ===============================
+    // 대기실 화면 (방 목록 / 방 만들기 / 채팅) 기능 있음
+    // ===============================
     private JPanel createLobbyPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
         panel.setBackground(new Color(230, 230, 230));
 
-        // 로비 텍스트 및 버튼들 (새로고침, 방 만들기)
+        //  새로고침, 방 만들기 버튼
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
 
@@ -194,12 +230,6 @@ public class ClientGUI extends JFrame {
         roomTable.getColumnModel().getColumn(3).setPreferredWidth(80);
         roomTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
 
-        // 더미 데이터
-        roomTableModel.addRow(new Object[]{"1", "아무나 들어오세요", "1/4", "대기중"});
-        roomTableModel.addRow(new Object[]{"2", "고수 환영", "2/4", "대기중"});
-        roomTableModel.addRow(new Object[]{"3", "1ㄷ1", "4/4", "게임중"});
-        roomTableModel.addRow(new Object[]{"4", "안녕하세요", "4/4", "대기중"});
-
         JScrollPane tableScrollPane = new JScrollPane(roomTable);
         tableScrollPane.setPreferredSize(new Dimension(740, 220));
         roomSectionPanel.add(tableScrollPane, BorderLayout.CENTER);
@@ -220,10 +250,6 @@ public class ClientGUI extends JFrame {
         lobbyChatArea.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
         lobbyChatArea.setLineWrap(true);
 
-        // 더미 데이터
-        lobbyChatArea.append("동섭 : 안녕하세요\n");
-        lobbyChatArea.append("성규 : 안녕하세요\n");
-
         JScrollPane chatScrollPane = new JScrollPane(lobbyChatArea);
         chatSectionPanel.add(chatScrollPane, BorderLayout.CENTER);
 
@@ -231,39 +257,57 @@ public class ClientGUI extends JFrame {
         lobbyChatInput.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
         lobbyChatInput.setPreferredSize(new Dimension(0, 28));
 
-        // 채팅 입력
-        lobbyChatInput.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String message = lobbyChatInput.getText().trim();
-                if (!message.isEmpty()) {
-                    lobbyChatArea.append((myNickname.isEmpty() ? "나" : myNickname) + " : " + message + "\n");
-                    lobbyChatInput.setText("");
-                    lobbyChatArea.setCaretPosition(lobbyChatArea.getDocument().getLength());
-                }
-            }
-        });
-
         chatSectionPanel.add(lobbyChatInput, BorderLayout.SOUTH);
 
         centerContainer.add(chatSectionPanel);
 
         panel.add(centerContainer, BorderLayout.CENTER);
 
-        // 방 두번 클릭하면 입장
+        // ===============================
+        // 대기실에서 사용하는 액션 모음
+        // 채팅 전송 / 새로고침 / 방 입장 / 방 만들기
+        // ===============================
+
+        // 로비에서 채팅 입력하면 서버로 전송 (CHAT|방번호|내용)
+        lobbyChatInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String message = lobbyChatInput.getText().trim();
+                if (message.isEmpty()) {
+                    return;
+                }
+                if (Protocol.hasReservedDelims(message)) {
+                    JOptionPane.showMessageDialog(ClientGUI.this, "채팅에 |, ;, , 문자는 사용할 수 없습니다.");
+                    return;
+                }
+                clientSocket.sendMessage(Protocol.build(Protocol.CHAT, LOBBY_ROOM_ID, message));
+                lobbyChatInput.setText("");
+            }
+        });
+
+        // 새로고침 버튼 누르면 방 목록 요청 전송 (REQ_ROOM_LIST)
+        refreshBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clientSocket.sendMessage(Protocol.REQ_ROOM_LIST);
+            }
+        });
+
+        // 방 목록 더블 클릭 하면 방 입장 요청 전송 (ENTER_ROOM|방번호)
         roomTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int selectedRow = roomTable.getSelectedRow();
                     if (selectedRow != -1) {
-                        showScreen(SCREEN_ROOM);
+                        String roomId = String.valueOf(roomTableModel.getValueAt(selectedRow, 0));
+                        clientSocket.sendMessage(Protocol.build(Protocol.ENTER_ROOM, roomId));
                     }
                 }
             }
         });
 
-        // 방 만들기 버튼 액션
+        // 방 만들기 버튼 누르면 방 생성 모달 열기
         createRoomBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -274,7 +318,9 @@ public class ClientGUI extends JFrame {
         return panel;
     }
 
-    // 방 만들기 다이얼로그
+    // ===============================
+    // 방 만들기 모달 창 (방제, 비밀번호, 방 생성 - 총 3개)
+    // ===============================
     private void openCreateRoomDialog() {
         JDialog dialog = new JDialog(this, "방 만들기", true);
         dialog.setSize(380, 220);
@@ -319,7 +365,8 @@ public class ClientGUI extends JFrame {
                     return;
                 }
                 dialog.dispose();
-                showScreen(SCREEN_ROOM);
+                // 나중에 프로토콜에 비밀번호 추가하기
+                clientSocket.sendMessage(Protocol.build(Protocol.CREATE_ROOM, roomTitle));
             }
         });
 
@@ -341,6 +388,9 @@ public class ClientGUI extends JFrame {
         dialog.setVisible(true);
     }
 
+    // ===============================
+    // 게임방 화면 임시로 파랗게
+    // ===============================
     private JPanel createRoomPanel() {
 
         JPanel panel = new JPanel();
@@ -362,14 +412,18 @@ public class ClientGUI extends JFrame {
         return panel;
     }
 
+    // ===============================
+    // 화면 전환, 서버 응답 처리 (콜백)
+    // ===============================
     public void showScreen(String screenName) {
         cardLayout.show(mainContainer, screenName);
     }
 
-    // 소켓 통신 응답 처리 메서드
+    // 소켓 통신 응답 처리
     public void onLoginSuccess() {
         lobbyUserLabel.setText("로비 (" + myNickname + ")");
         showScreen(SCREEN_LOBBY);
+        clientSocket.sendMessage(Protocol.REQ_ROOM_LIST);
     }
 
     public void onLoginFail(String reason) {
@@ -406,6 +460,9 @@ public class ClientGUI extends JFrame {
         JOptionPane.showMessageDialog(this, reason);
     }
 
+    // ===============================
+    // 프로그램 시작 메인
+    // ===============================
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override

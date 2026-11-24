@@ -14,7 +14,7 @@ public class ClientSocket {
     private ClientGUI gui;
     private boolean isRunning = false;
 
-    // gui 객체랑 서버 정보를 받아서 init 하기
+    // gui 객체랑 서버 정보를 받아서 초기화 하기
     public ClientSocket(ClientGUI gui, String serverIp, int serverPort) {
         this.gui = gui;
         this.serverIp = serverIp;
@@ -27,6 +27,7 @@ public class ClientSocket {
             socket = new Socket(serverIp, serverPort);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             out = new PrintWriter(socket.getOutputStream(), true);
+            isRunning = true;
 
             // 서버 메시지를 계속 받을 수 있는 백그라운드 스레드
             Thread thread = new Thread(new Runnable() {
@@ -35,6 +36,7 @@ public class ClientSocket {
                     listen();
                 }
             });
+
             thread.start();
 
             return true;
@@ -51,12 +53,11 @@ public class ClientSocket {
         }
     }
 
-    // 서버 메세지 받기 위한 대기 루프
+    // 서버 메세지 받기 위해서 대기시킴
     private void listen() {
         try {
             String line;
-            while (isRunning && (line =
-                    in.readLine()) != null) {
+            while (isRunning && (line = in.readLine()) != null) {
                 System.out.println("[서버 수신] " + line);
                 handleServerMessage(line);
             }
@@ -69,7 +70,7 @@ public class ClientSocket {
         }
     }
 
-    // 서버로 부터 받은 프로토콜 해석과 GUI 반영
+    // 서버로 부터 받은 프로토콜 파싱하고 이를 GUI 반영
     private void handleServerMessage(String message) {
         String[] tokens = message.split(Protocol.SEP);
         if (tokens.length == 0) {
@@ -77,7 +78,7 @@ public class ClientSocket {
         }
         String command = tokens[0];
 
-        // EDT 스레드에서 화면 새로고침 해주기
+        // 화면 새로고침 해주기 EDT 스레드에서 (서버로부터 응답 받으면)
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -91,24 +92,24 @@ public class ClientSocket {
                         gui.onLoginFail(reason);
                         break;
 
-                    case Protocol.RES_ROOM_LIST: // 방 목록 수신받으면 로비 테이블 갱신
+                    case Protocol.RES_ROOM_LIST: // 방 목록 받으면 로비 화면에서 방 목록 갱신
                         String roomData = tokens.length > 1 ? tokens[1] : "";
                         gui.updateRoomList(roomData);
                         break;
 
-                    case Protocol.CHAT: // 채팅 받으면 채팅창에 추가 (CHAT|발신자|내용)
+                    case Protocol.CHAT: // 채팅 받으면 채팅창에 추가 (CHAT|발신자|내용) <- 이런 양식으로
                         if (tokens.length >= 3) {
                             gui.appendChatMessage(tokens[1], tokens[2]);
                         }
                         break;
 
-                    case Protocol.ROOM_OK: // 방 입장/생성 성공 -> 게임방 화면으로 전환 (ROOM_OK|방번호|방제목)
+                    case Protocol.ROOM_OK: // 방 입장/생성 성공 -> 게임방 화면으로 전환 (ROOM_OK|방번호|방제목) <- 게임방 화면은 아직 미구현
                         String roomId = tokens.length > 1 ? tokens[1] : "";
                         String roomTitle = tokens.length > 2 ? tokens[2] : "";
                         gui.onEnterRoomSuccess(roomId, roomTitle);
                         break;
 
-                    case Protocol.ROOM_FAIL: // 방 입장 실패 알림
+                    case Protocol.ROOM_FAIL: // 방 입장 실패 알림 - 이미 꽉차있거나, 방이 없어졌을때?
                         String failMsg = tokens.length > 1 ? tokens[1] : "방 입장에 실패했습니다.";
                         gui.onRoomFail(failMsg);
                         break;
@@ -121,7 +122,7 @@ public class ClientSocket {
         });
     }
 
-    // 소켓 및 스트림 종료
+    // 소켓 종료, 스트림 종료
     public void disconnect() {
         isRunning = false;
         try {
