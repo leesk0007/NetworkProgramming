@@ -15,7 +15,7 @@ public class ClientGUI extends JFrame {
     public static final String SCREEN_ROOM = "ROOM";
 
     private static final String SERVER_IP = "127.0.0.1";
-    private static final int SERVER_PORT = 12345;
+    private static final int SERVER_PORT = 54321;
     private static final String LOBBY_ROOM_ID = "0";
 
     private CardLayout cardLayout;
