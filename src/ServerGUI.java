@@ -190,7 +190,7 @@ public class ServerGUI extends JFrame {
 		String fileName = "words.json";
 		File file = new File(fileName);
 		if (!file.exists()) {
-			fileName = "server/words.json";
+			fileName = "src/words.json";
 		}
 
 		try {
