@@ -42,6 +42,7 @@ public class ServerGUI extends JFrame {
 	private JTextArea t_display;
 	private JButton b_connect, b_disconnect, b_exit;
 
+	// 서버 창 생성
 	public ServerGUI(int port) {
 		super("초성 퀴즈 Server");
 
@@ -57,11 +58,13 @@ public class ServerGUI extends JFrame {
 		loadWords();
 	}
 
+	// 화면 구성
 	private void buildGUI() {
 		add(createDisplayPanel(), BorderLayout.CENTER);
 		add(createControlPanel(), BorderLayout.SOUTH);
 	}
 
+	// 로그 출력창 생성
 	private JPanel createDisplayPanel() {
 		JPanel p = new JPanel(new BorderLayout());
 
@@ -73,6 +76,7 @@ public class ServerGUI extends JFrame {
 		return p;
 	}
 
+	// 시작·종료 버튼 생성
 	private JPanel createControlPanel() {
 		JPanel p = new JPanel(new GridLayout(1, 0));
 
@@ -123,6 +127,7 @@ public class ServerGUI extends JFrame {
 		return p;
 	}
 
+	// 서버 IP 확인
 	private String getLocalAddr() {
 		InetAddress local = null;
 		String addr = "";
@@ -135,6 +140,7 @@ public class ServerGUI extends JFrame {
 		return addr;
 	}
 
+	// 접속 대기·수락
 	private void startServer() {
 		Socket clientSocket = null;
 		try {
@@ -158,6 +164,7 @@ public class ServerGUI extends JFrame {
 		}
 	}
 
+	// 서버 종료
 	private void disconnect() {
 		try {
 			acceptThread = null;
@@ -172,11 +179,13 @@ public class ServerGUI extends JFrame {
 		}
 	}
 
+	// 로그 출력
 	private void printDisplay(String msg) {
 		t_display.append(msg + "\n");
 		t_display.setCaretPosition(t_display.getDocument().getLength());
 	}
 
+	// 문제 파일 읽기
 	private void loadWords() {
 		String fileName = "words.json";
 		File file = new File(fileName);
@@ -204,6 +213,7 @@ public class ServerGUI extends JFrame {
 		}
 	}
 
+	// 문제 데이터 값 추출
 	private String getValue(String line) {
 		String value = line.substring(line.indexOf(":") + 1).trim();
 		if (value.endsWith(",")) {
@@ -213,6 +223,7 @@ public class ServerGUI extends JFrame {
 		return value;
 	}
 
+	// 초성 추출
 	private String getChosung(String word) {
 		String cho = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
 		String result = "";
@@ -228,12 +239,14 @@ public class ServerGUI extends JFrame {
 		return result;
 	}
 
+	// 힌트 생성
 	private String makeHint(String word, int count) {
 		String hint = word.substring(0, count);
 		hint = hint + getChosung(word.substring(count));
 		return hint;
 	}
 
+	// 방 목록 메시지 생성
 	private String getRoomList() {
 		String list = "";
 		for (int i = 0; i < rooms.size(); i++) {
@@ -250,6 +263,7 @@ public class ServerGUI extends JFrame {
 		return ServerProtocol.RES_ROOM_LIST + "|" + list;
 	}
 
+	// 로비에 방 목록 전송
 	private void sendRoomList() {
 		String msg = getRoomList();
 		for (ClientHandler c : users) {
@@ -259,6 +273,7 @@ public class ServerGUI extends JFrame {
 		}
 	}
 
+	// 방 번호로 방 찾기
 	private Room findRoom(int id) {
 		for (Room r : rooms) {
 			if (r.id == id) {
@@ -268,6 +283,7 @@ public class ServerGUI extends JFrame {
 		return null;
 	}
 
+	// 닉네임·방제목 검사
 	private boolean checkName(String name) {
 		if (name.equals("") || name.contains("|") || name.contains(";") || name.contains(",")) {
 			return false;
@@ -290,18 +306,21 @@ public class ServerGUI extends JFrame {
 
 		Thread gameThread = null;
 
+		// 방 생성
 		Room(int id, String title, ClientHandler host) {
 			this.id = id;
 			this.title = title;
 			this.host = host;
 		}
 
+		// 방 전체 전송
 		void broadcasting(String msg) {
 			for (ClientHandler c : members) {
 				c.sendMessage(msg);
 			}
 		}
 
+		// 본인 제외 전송
 		void broadcastingOthers(String msg, ClientHandler me) {
 			for (ClientHandler c : members) {
 				if (c != me) {
@@ -310,6 +329,7 @@ public class ServerGUI extends JFrame {
 			}
 		}
 
+		// 참가자 목록 생성
 		String getUserList() {
 			String list = "";
 			for (int i = 0; i < members.size(); i++) {
@@ -321,6 +341,7 @@ public class ServerGUI extends JFrame {
 			return ServerProtocol.USER_LIST + "|" + list;
 		}
 
+		// 점수 순위 생성
 		String getScoreList() {
 			Vector<ClientHandler> list = new Vector<ClientHandler>();
 			for (ClientHandler c : members) {
@@ -347,6 +368,7 @@ public class ServerGUI extends JFrame {
 			return result;
 		}
 
+		// 선착순 정답 판정
 		synchronized void checkAnswer(ClientHandler c, String word) {
 			printDisplay("[" + id + "번 방] " + c.uid + " 정답 제출: " + word);
 
@@ -383,6 +405,7 @@ public class ServerGUI extends JFrame {
 			printDisplay("[" + id + "번 방] 정답: " + c.uid + " +" + point + "점 (" + getScoreList() + ")");
 		}
 
+		// 시간 초과·스킵 처리
 		synchronized void timeOver() {
 			if (solved) {
 				return;
@@ -396,6 +419,7 @@ public class ServerGUI extends JFrame {
 			}
 		}
 
+		// 방 퇴장 처리
 		synchronized void removeUser(ClientHandler c) {
 			members.removeElement(c);
 			printDisplay("[" + id + "번 방] " + c.uid + " 퇴장");
@@ -414,6 +438,7 @@ public class ServerGUI extends JFrame {
 			}
 		}
 
+		// 게임 진행 시작
 		void start() {
 			gameThread = new Thread(new Runnable() {
 				@Override
@@ -489,6 +514,7 @@ public class ServerGUI extends JFrame {
 			gameThread.start();
 		}
 
+		// 게임 진행 중지
 		void stop() {
 			gameThread = null;
 		}
@@ -506,10 +532,12 @@ public class ServerGUI extends JFrame {
 		private boolean doubleScore = false;
 		private boolean banned = false;
 
+		// 클라이언트 처리 객체 생성
 		public ClientHandler(Socket clientSocket) {
 			this.clientSocket = clientSocket;
 		}
 
+		// 클라이언트 신호 수신·분기
 		private void receiveMessages(Socket cs) {
 			try {
 				BufferedReader in = new BufferedReader(new InputStreamReader(cs.getInputStream(), "UTF-8"));
@@ -603,6 +631,7 @@ public class ServerGUI extends JFrame {
 			}
 		}
 
+		// 클라이언트에 신호 전달
 		private void sendMessage(String msg) {
 			try {
 				out.write(msg + "\n");
@@ -612,12 +641,14 @@ public class ServerGUI extends JFrame {
 			}
 		}
 
+		// 전체 접속자 전송
 		private void broadcasting(String msg) {
 			for (ClientHandler c : users) {
 				c.sendMessage(msg);
 			}
 		}
 
+		// 방번호 확인
 		private boolean checkRoom(String[] msg) {
 			if (room == null || msg.length < 2 || !msg[1].equals(room.id + "")) {
 				sendMessage(ServerProtocol.ERROR + "|방번호 불일치");
@@ -626,6 +657,7 @@ public class ServerGUI extends JFrame {
 			return true;
 		}
 
+		// 닉네임 설정
 		private void setName(String[] msg) {
 			if (uid != null) {
 				sendMessage(ServerProtocol.ERROR + "|이미 로그인됨");
@@ -649,6 +681,7 @@ public class ServerGUI extends JFrame {
 			printDisplay("현재 참가자 수: " + users.size());
 		}
 
+		// 방 만들기
 		private void createRoom(String[] msg) {
 			if (room != null) {
 				sendMessage(ServerProtocol.ROOM_FAIL + "|이미 방에 있음");
@@ -671,6 +704,7 @@ public class ServerGUI extends JFrame {
 			printDisplay("방 생성: [" + r.id + "번 방] " + r.title + " (방장: " + uid + ")");
 		}
 
+		// 방 입장
 		private void enterRoom(String[] msg) {
 			if (room != null) {
 				sendMessage(ServerProtocol.ROOM_FAIL + "|이미 방에 있음");
@@ -706,6 +740,7 @@ public class ServerGUI extends JFrame {
 			printDisplay("[" + r.id + "번 방] " + uid + " 입장");
 		}
 
+		// 방 나가기
 		private void leaveRoom() {
 			Room r = room;
 			room = null;
@@ -713,6 +748,7 @@ public class ServerGUI extends JFrame {
 			sendRoomList();
 		}
 
+		// 게임 시작
 		private void gameStart() {
 			if (room.host != this) {
 				sendMessage(ServerProtocol.START_FAIL + "|방장이 아님");
@@ -747,6 +783,7 @@ public class ServerGUI extends JFrame {
 			room.start();
 		}
 
+		// 정답 제출 처리
 		private void submitAnswer(String[] msg) {
 			if (msg.length < 3) {
 				sendMessage(ServerProtocol.ERROR + "|필드 부족");
@@ -764,6 +801,7 @@ public class ServerGUI extends JFrame {
 			room.checkAnswer(this, msg[2].trim());
 		}
 
+		// 라운드 스킵
 		private void skipRound() {
 			if (!room.playing || !room.skipEnabled || room.solved) {
 				sendMessage(ServerProtocol.SKIP_FAIL + "|아직 스킵할 수 없음");
@@ -773,6 +811,7 @@ public class ServerGUI extends JFrame {
 			printDisplay("[" + room.id + "번 방] " + uid + " 스킵 요청");
 		}
 
+		// 아이템 사용
 		private void useItem(String[] msg) {
 			if (msg.length < 3) {
 				sendMessage(ServerProtocol.ERROR + "|필드 부족");
@@ -838,12 +877,14 @@ public class ServerGUI extends JFrame {
 			}
 		}
 
+		// 수신 스레드 실행
 		@Override
 		public void run() {
 			receiveMessages(clientSocket);
 		}
 	}
 
+	// 서버 실행
 	public static void main(String[] args) {
 		int port = ServerProtocol.PORT;
 
