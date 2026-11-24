@@ -275,7 +275,7 @@ public class ServerGUI extends JFrame {
 		return true;
 	}
 
-	class Room {
+	private class Room {
 		int id;
 		String title;
 		ClientHandler host;
@@ -494,7 +494,7 @@ public class ServerGUI extends JFrame {
 		}
 	}
 
-	class ClientHandler extends Thread {
+	private class ClientHandler extends Thread {
 		private Socket clientSocket;
 		private BufferedWriter out;
 		private String uid;
@@ -818,7 +818,7 @@ public class ServerGUI extends JFrame {
 				target.sendMessage(ServerProtocol.INPUT_LOCK + "|" + ServerProtocol.LOCK_SECONDS);
 				printDisplay("[" + room.id + "번 방] 아이템: " + uid + " -> " + target.uid + " 입력 금지");
 
-				ClientHandler t = target;
+				final ClientHandler t = target;
 				Thread unlockThread = new Thread(new Runnable() {
 					@Override
 					public void run() {
